@@ -1,0 +1,9 @@
+{
+  "user_id": 1,
+  "payment_method": "cash",
+  "items": [
+    { "product_id": 1, "quantity": 1 },
+    { "product_id": 2, "quantity": 2 }
+  ],
+  "discount_codes": []
+}
