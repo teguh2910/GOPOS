@@ -1,5 +1,6 @@
 # Stage 1: Build the Go binary
-FROM golang:1.22-alpine AS builder
+# Use a Go version that matches or exceeds the version in go.mod
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
