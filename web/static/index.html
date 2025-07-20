@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoPOS - Point of Sale</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" onclick="showPage('pos')">POS</a>
+            <a href="#" onclick="showPage('products')">Products</a>
+            <a href="#" onclick="showPage('customers')">Customers</a>
+            <a href="#" onclick="showPage('reports')">Reports</a>
+        </nav>
+        <div class="user-status">
+            <span>User ID: <span id="user-id-display">None</span></span>
+            <a href="#" onclick="showPage('login')">(Login)</a>
+        </div>
+    </header>
+
+    <main id="app-content">
+        <!-- Content will be loaded here by JavaScript -->
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
