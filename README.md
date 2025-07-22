@@ -1,6 +1,6 @@
 # GoPOS - Lightweight Point of Sale System
 
-GoPOS is a very lightweight, full-featured Point of Sale (POS) application built with Go for the backend and vanilla HTML/CSS/JS for the frontend. It's designed to be extremely efficient, capable of running on servers with minimal resources (e.g., 1 CPU core, 256MB RAM).
+GoPOS is a very lightweight, full-featured Point of Sale (POS) application built with Go for the backend and Next.js with Tailwind CSS for the frontend. It's designed to be extremely efficient, capable of running on servers with minimal resources (e.g., 1 CPU core, 256MB RAM).
 
 The entire application is self-contained and can be run as a single binary or a minimal Docker container.
 
@@ -20,7 +20,7 @@ The entire application is self-contained and can be run as a single binary or a 
 - **Backend**: Go
 - **Web Router**: Chi
 - **Database**: SQLite (embedded, no separate server needed)
-- **Frontend**: HTML, CSS, JavaScript (no frameworks)
+- **Frontend**: Next.js 15 with React 19, TypeScript, and Tailwind CSS
 - **Deployment**: Docker
 
 ## Getting Started
@@ -38,24 +38,46 @@ The entire application is self-contained and can be run as a single binary or a 
     By default, this will create the database file at `./pos.db`.
 3.  **Open the application:** Navigate to `http://localhost:8081` in your web browser.
 
-### Running with Docker
+### Running with Next.js Frontend (Development)
+
+For development with the new Next.js frontend:
+
+1.  **Start the Go backend:**
+    ```bash
+    go run ./cmd/server
+    ```
+    This will start the API server on `http://localhost:8081`.
+
+2.  **Start the Next.js frontend:**
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+    This will start the frontend development server on `http://localhost:3000`.
+
+3.  **Open the application:** Navigate to `http://localhost:3000` in your web browser.
+
+### Running with Docker (Recommended for Production)
 
 **Prerequisites:**
 - Docker installed and running.
 
 1.  **Build the Docker image:**
     ```bash
-    docker build -t gopos-app .
+    docker build -t gopos-nextjs .
     ```
 
 2.  **Run the Docker container:**
-    This command will run the app and create a `pos_data` directory on your host machine to persistently store the database.
+    This command runs the app with the new Next.js frontend and creates a named volume for database persistence.
 
     ```bash
-    docker run -d -p 8081:8081 -v "$(pwd)/pos_data":/app/data --name gopos gopos-app
+    docker run -d -p 8081:8081 -v gopos-data:/app/data --name gopos gopos-nextjs
     ```
 
 3.  **Open the application:** Navigate to `http://localhost:8081` in your web browser.
+
+The Docker image includes both the Go backend and the Next.js frontend in a single, optimized container. See [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md) for detailed deployment instructions and testing procedures.
 
 ## API Endpoints
 

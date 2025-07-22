@@ -3,6 +3,7 @@ package router
 import (
 	"database/sql"
 	"net/http"
+	"os"
 	"pos-app/internal/handler"
 
 	"github.com/go-chi/chi/v5"
@@ -73,8 +74,18 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 		})
 	})
 
-	// Serve static files
-	fs := http.FileServer(http.Dir("./web/static"))
+	// Serve static files - try Next.js build first, fallback to original
+	// Check if Next.js build exists, otherwise use original static files
+	var staticDir string
+	if _, err := os.Stat("./web/static/index.html"); err == nil {
+		staticDir = "./web/static"
+	} else if _, err := os.Stat("./web/static-original/index.html"); err == nil {
+		staticDir = "./web/static-original"
+	} else {
+		staticDir = "./web/static"
+	}
+
+	fs := http.FileServer(http.Dir(staticDir))
 	r.Handle("/*", fs)
 
 	return r

@@ -1,6 +1,23 @@
-# Stage 1: Build the Go binary
-# Use a Go version that matches or exceeds the version in go.mod
-FROM golang:1.24-alpine AS builder
+# Stage 1: Build the Next.js frontend
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
+# Copy package files and install dependencies
+COPY frontend/package*.json ./
+RUN npm install
+
+# Copy frontend source code
+COPY frontend/ ./
+
+# Build the Next.js application for static export
+RUN npm run build
+
+# Stage 2: Build the Go binary
+FROM golang:1.24-alpine AS backend-builder
 
 WORKDIR /app
 
@@ -8,28 +25,35 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the rest of the application source code
-COPY . .
+# Copy the rest of the application source code (excluding frontend)
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY web/ ./web/
 
 # Build the application, disabling CGO to create a static binary
-# The output is named 'pos-server'
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o pos-server ./cmd/server
 
-# Stage 2: Create the final, minimal image
-FROM scratch
+# Stage 3: Create the final, minimal image
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS requests (if needed)
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 
-# Copy the static binary from the builder stage
-COPY --from=builder /app/pos-server .
+# Copy the static binary from the backend builder stage
+COPY --from=backend-builder /app/pos-server .
 
-# Copy the static frontend assets
-COPY web/static ./web/static
+# Copy the built Next.js frontend from the frontend builder stage
+COPY --from=frontend-builder /app/frontend/dist ./web/static
 
-# The application will create and use 'pos.db' in the working directory.
-# It's recommended to mount a volume here to persist the database.
-# e.g., docker run -v /path/to/data:/app/data ...
-# We will expose a /data volume for the database file.
+# Copy the original static files as fallback (for API serving)
+COPY --from=backend-builder /app/web/static ./web/static-original
+
+# Create data directory for database
+RUN mkdir -p /app/data
+
+# The application will create and use 'pos.db' in the data directory
 VOLUME /app/data
 
 # Expose port 8081 to the outside world
